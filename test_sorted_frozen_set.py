@@ -23,6 +23,7 @@ class TestConstruction(unittest.TestCase):
 
 class TestContainerProtocol(unittest.TestCase):
 
+    # CONTAIN PROTOCOL
     # Method used to prepare the test context. In this example is used
     # to attach text fixtures to the test instance self.
     def setUp(self):
@@ -39,6 +40,32 @@ class TestContainerProtocol(unittest.TestCase):
 
     def test_negative_not_contained(self):
         self.assertFalse(9 not in self.s)
+
+
+# SIZE PROTOCOL
+class TestSizedProtocol(unittest.TestCase):
+
+    def test_empty_with_default(self):
+        s = SortedFrozenSet()
+        self.assertEqual(len(s), 0)
+
+    def test_empty(self):
+        s = SortedFrozenSet([])
+        self.assertEqual(len(s), 0)
+
+    def test_one(self):
+        s = SortedFrozenSet([42])
+        self.assertEqual(len(s), 1)
+
+    def test_ten(self):
+        s = SortedFrozenSet(range(10))
+        self.assertEqual(len(s), 10)
+
+    # In the SortedFrozenSet constructor the set method
+    # eliminates the duplicates
+    def test_with_duplicates(self):
+        s = SortedFrozenSet([5, 5, 5])
+        self.assertEqual(len(s), 1)
 
 
 if __name__ == "__main__":
