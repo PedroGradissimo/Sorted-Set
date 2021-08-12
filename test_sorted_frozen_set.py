@@ -68,5 +68,7 @@ class TestSizedProtocol(unittest.TestCase):
         self.assertEqual(len(s), 1)
 
 
-if __name__ == "__main__":
-    unittest.main()
+class TestIterableProtocol(unittest.TestCase):
+
+    if __name__ == "__main__":
+        unittest.main()
