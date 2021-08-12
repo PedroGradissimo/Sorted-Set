@@ -70,5 +70,80 @@ class TestSizedProtocol(unittest.TestCase):
 
 class TestIterableProtocol(unittest.TestCase):
 
+    def setUp(self):
+        self.s = SortedFrozenSet([7, 2, 1, 1, 9])
+
+    # The sorted method in the constructor returns an ordered list and the
+    # set method inside eliminates de duplicates
+    def test_iter(self):
+        iterator = iter(self.s)
+        self.assertEqual(next(iterator), 1)
+        self.assertEqual(next(iterator), 2)
+        self.assertEqual(next(iterator), 7)
+        self.assertEqual(next(iterator), 9)
+        self.assertRaises(
+            StopIteration,
+            lambda: next(iterator)
+        )
+
+    def test_for_loop(self):
+        expected = [1, 2, 7, 9]
+        index = 0
+        for item in self.s:
+            self.assertEqual(item, expected[index])
+            index += 1
+
+
+class TestSequenceProtocol(unittest.TestCase):
+
+    def setUp(self):
+        self.s = SortedFrozenSet([1, 4, 9, 13, 15])
+
+    def text_index_zero(self):
+        self.assertEqual(self.s[0], 1)
+
+    def test_index_four(self):
+        self.assertEqual(self.s[4], 15)
+
+    def test_index_one_beyond_the_end(self):
+        with self.assertRaises(IndexError):
+            self.s[5]
+
+    def test_index_minus_one(self):
+        self.assertEqual(self.s[-1], 15)
+
+    def test_index_minus_four(self):
+        self.assertEqual(self.s[-5], 1)
+
+    def test_index_one_before_the_beginning(self):
+        with self.assertRaises(IndexError):
+            self.s[-6]
+
+    def test_slice_to_end(self):
+        self.assertEqual(self.s[3:], SortedFrozenSet([13, 15]))
+
+    def test_slice_empty(self):
+        self.assertEqual(self.s[5:], SortedFrozenSet())
+
+    def test_slice_arbitrary(self):
+        self.assertEqual(self.s[2:4], SortedFrozenSet([9, 13]))
+
+    def test_slice_step(self):
+        self.assertEqual(self.s[0:5:2], SortedFrozenSet([1, 9, 15]))
+
+    def test_slice_full(self):
+        self.assertEqual(self.s[:], self.s)
+
+
+class TestReprProtocol(unittest.TestCase):
+
+    def test_repr_empty(self):
+        s = SortedFrozenSet()
+        self.assertEqual(repr(s), "SortedFrozenSet()")
+
+    def test_repr_one(self):
+        s = SortedFrozenSet([42, 40, 19])
+        self.assertEqual(repr(s), "SortedFRozenSet([19, 40, 42])")
+
     if __name__ == "__main__":
         unittest.main()
