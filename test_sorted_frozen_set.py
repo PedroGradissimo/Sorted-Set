@@ -134,6 +134,80 @@ class TestSequenceProtocol(unittest.TestCase):
     def test_slice_full(self):
         self.assertEqual(self.s[:], self.s)
 
+    def test_reversed(self):
+        r = reversed(self.s)
+        self.assertEqual(next(r), 15)
+        self.assertEqual(next(r), 13)
+        self.assertEqual(next(r), 9)
+        self.assertEqual(next(r), 4)
+        self.assertEqual(next(r), 1)
+        self.assertRaises(StopIteration, lambda: next(r))
+
+    def test_index_positive(self):
+        s = SortedFrozenSet([1, 5, 8, 9])
+        self.assertEqual(s.index(8), 2)
+
+    def test_index_negative(self):
+        s = SortedFrozenSet([1, 5, 8, 9])
+        with self.assertRaises(ValueError):
+            s.index(15)
+
+    def test_count_zero(self):
+        self.assertEqual(self.s.count(16), 0)
+
+    def test_count_one(self):
+        self.assertEqual(self.s.count(13), 1)
+
+    def test_add_disjoint(self):
+        s = SortedFrozenSet([1, 2, 3])
+        t = SortedFrozenSet([4, 5, 6])
+        self.assertEqual(s + t, SortedFrozenSet([1, 2, 3, 4, 5, 6]))
+
+    def test_add_equal(self):
+        s = SortedFrozenSet([2, 4, 6])
+        self.assertEqual(s + s, s)
+
+    def test_add_intersecting(self):
+        s = SortedFrozenSet([1, 2, 3])
+        t = SortedFrozenSet([3, 4, 5])
+        self.assertEqual(s + t, SortedFrozenSet([1, 2, 3, 4, 5]))
+
+    def test_add_type_error_left(self):
+        s = SortedFrozenSet([1, 2, 3])
+        t = [3, 4, 5]
+        with self.assertRaises(TypeError):
+            _ = s + t
+
+    def test_add_type_error_right(self):
+        s = [3, 4, 5]
+        t = SortedFrozenSet([1, 2, 3])
+        with self.assertRaises(TypeError):
+            _ = s + t
+
+    def test_repetition_zero_right(self):
+        s = SortedFrozenSet([4, 5, 6])
+        self.assertEqual(s * 0, SortedFrozenSet())
+
+    def test_repetition_negative_right(self):
+        s = SortedFrozenSet([4, 5, 6])
+        self.assertEqual(s * -1, SortedFrozenSet())
+
+    def test_repetition_nonzero_right(self):
+        s = SortedFrozenSet([4, 5, 6])
+        self.assertEqual(s * 100, s)
+
+    def test_repetition_zero_left(self):
+        s = SortedFrozenSet([4, 5, 6])
+        self.assertEqual(0 * s, SortedFrozenSet())
+
+    def test_repetition_negative_left(self):
+        s = SortedFrozenSet([4, 5, 6])
+        self.assertEqual(-1 * s, SortedFrozenSet())
+
+    def test_repetition_nonzero_left(self):
+        s = SortedFrozenSet([4, 5, 6])
+        self.assertEqual(100 * s, s)
+
 
 class TestReprProtocol(unittest.TestCase):
 
@@ -143,7 +217,61 @@ class TestReprProtocol(unittest.TestCase):
 
     def test_repr_one(self):
         s = SortedFrozenSet([42, 40, 19])
-        self.assertEqual(repr(s), "SortedFRozenSet([19, 40, 42])")
+        self.assertEqual(repr(s), "SortedFrozenSet([19, 40, 42])")
 
-    if __name__ == "__main__":
-        unittest.main()
+
+class TestEqualityProtocol(unittest.TestCase):
+
+    def test_positive_equal(self):
+        self.assertTrue(
+            SortedFrozenSet([4, 5, 6]) == SortedFrozenSet([6, 5, 4])
+        )
+
+    def test_negative_equal(self):
+        self.assertFalse(
+            SortedFrozenSet([4, 5, 6]) == SortedFrozenSet([1, 2, 3])
+        )
+
+    def type_mismatch(self):
+        self.assertFalse(
+            SortedFrozenSet([4, 5, 6]) == [4, 5, 6]
+        )
+
+    def test_identical(self):
+        s = SortedFrozenSet([10, 11, 12])
+        self.assertTrue(s == s)
+
+
+class TestInequalityProtocol(unittest.TestCase):
+
+    def test_positive_unequal(self):
+        self.assertTrue(
+            SortedFrozenSet([4, 5, 6]) != SortedFrozenSet([9, 7, 4])
+        )
+
+    def test_negative_unequal(self):
+        self.assertFalse(
+            SortedFrozenSet([4, 5, 6]) != SortedFrozenSet([4, 5, 6])
+        )
+
+    def test_type_mismatch(self):
+        self.assertTrue(
+            SortedFrozenSet([4, 5, 6]) != [4, 5, 6]
+        )
+
+    def test_identical(self):
+        s = SortedFrozenSet([10, 11, 12])
+        self.assertFalse(s != s)
+
+
+class TestHashableProtocol(unittest.TestCase):
+
+    def test_equal_sets_have_the_same_hash_code(self):
+        self.assertEqual(
+            hash(SortedFrozenSet([5, 2, 1, 4])),
+            hash(SortedFrozenSet([5, 2, 1, 4])),
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()
